@@ -8,15 +8,19 @@ ET.register_namespace('', 'urn:strusoft')
 st.title("Hent fundamentlaster")
 
 #tab1,tab2,tab3,tab4 = st.tabs(["input","beregning av størrelser", "plot av løft", "plot horisontallaster"])
+resultcsvpath_neg = st.file_uploader("Velg out_neg-fil", type="csv", accept_multiple_files=False)
+resultcsvpath_pos= st.file_uploader("Velg out_sup-fil", type="csv", accept_multiple_files=False)
+file_path = st.file_uploader("Velg femdesign-fil", type="struxml", accept_multiple_files=False)
 
+#def extract_foundations_and_axis(json_file):
+def extract_foundations_and_axis(resultcsvpath_neg, resultcsvpath_pos, file_path):
+    #resultcsvpath_neg_path = json_file['OutputPath_sup_neg']
+    #resultcsvpath_pos_path = json_file['OutputPath_sup_pos']
+    #file_path_str_path = json_file['FilePath']
 
-def extract_foundations_and_axis(json_file):
-    resultcsvpath_neg = json_file['OutputPath_sup_neg']
-    resultcsvpath_pos = json_file['OutputPath_sup_pos']
-    file_path_str = json_file['FilePath']
     resultcsv_neg = pd.read_csv(resultcsvpath_neg, delimiter='\t', skiprows=1)
     resultcsv_pos = pd.read_csv(resultcsvpath_pos, delimiter='\t', skiprows=1)
-    file_path = f'{file_path_str}uxml'
+    #file_path = f'{file_path_str}uxml'
     tree = ET.parse(file_path)
     rootlist = tree.getroot()
     root = rootlist[0]
@@ -74,12 +78,17 @@ def extract_foundations_and_axis(json_file):
     df_punktfundamenter = pd.DataFrame(data)
     return df_punktfundamenter
 
-json_file = json.load(st.file_uploader("Velg JSON-fil", type="json", accept_multiple_files=False))
-if st.button("hent laster og søyler"):
-    df_punktfundamenter = extract_foundations_and_axis(json_file)
-    st.download_button(
-        label="Download data as CSV",
-        data=df_punktfundamenter.to_csv().encode("utf-8"),
-        file_name="large_df.csv",
-        mime="text/csv",
-    )
+#json_file = json.load(st.file_uploader("Velg JSON-fil", type="json", accept_multiple_files=False))
+#if json_file is not None:
+if st.button("hent laster"):
+    #df_punktfundamenter = extract_foundations_and_axis(json_file)
+    try:
+        df_punktfundamenter = extract_foundations_and_axis(resultcsvpath_neg, resultcsvpath_pos, file_path)
+        st.download_button(
+            label="Download data as CSV",
+            data=df_punktfundamenter.to_csv().encode("utf-8"),
+            file_name="large_df.csv",
+            mime="text/csv",
+        )
+    except:
+        st.write("last opp filer")

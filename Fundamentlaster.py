@@ -86,7 +86,7 @@ if st.button("hent laster"):
         df_punktfundamenter = extract_foundations_and_axis(resultcsvpath_neg, resultcsvpath_pos, file_path)
         st.download_button(
             label="Download data as CSV",
-            data=df_punktfundamenter.to_csv().encode("utf-8"),
+            data=df_punktfundamenter.to_csv(sep=";").encode("utf-8"),
             file_name="large_df.csv",
             mime="text/csv",
         )

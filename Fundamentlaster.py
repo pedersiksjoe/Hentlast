@@ -1,26 +1,21 @@
 import pandas as pd
-import math
 import streamlit as st
 import xml.etree.ElementTree as ET
-import json
 ET.register_namespace('', 'urn:strusoft')
 
 st.title("Hent fundamentlaster")
 
-#tab1,tab2,tab3,tab4 = st.tabs(["input","beregning av størrelser", "plot av løft", "plot horisontallaster"])
 resultcsvpath_neg = st.file_uploader("Velg out_neg-fil", type="csv", accept_multiple_files=False)
-resultcsvpath_pos= st.file_uploader("Velg out_sup-fil", type="csv", accept_multiple_files=False)
+resultcsvpath_neg_perm = st.file_uploader("Velg out_neg_kar_perm-fil", type="csv", accept_multiple_files=False)
+resultcsvpath_neg_var = st.file_uploader("Velg out_neg_kar_var-fil", type="csv", accept_multiple_files=False)
 file_path = st.file_uploader("Velg femdesign-fil", type="struxml", accept_multiple_files=False)
 
-#def extract_foundations_and_axis(json_file):
-def extract_foundations_and_axis(resultcsvpath_neg, resultcsvpath_pos, file_path):
-    #resultcsvpath_neg_path = json_file['OutputPath_sup_neg']
-    #resultcsvpath_pos_path = json_file['OutputPath_sup_pos']
-    #file_path_str_path = json_file['FilePath']
 
+def extract_foundations_and_axis(resultcsvpath_neg_perm,resultcsvpath_neg_var, resultcsvpath_neg, file_path):
+
+    resultcsv_neg_perm = pd.read_csv(resultcsvpath_neg_perm, delimiter='\t', skiprows=1)
+    resultcsv_neg_var = pd.read_csv(resultcsvpath_neg_var, delimiter='\t', skiprows=1)
     resultcsv_neg = pd.read_csv(resultcsvpath_neg, delimiter='\t', skiprows=1)
-    resultcsv_pos = pd.read_csv(resultcsvpath_pos, delimiter='\t', skiprows=1)
-    #file_path = f'{file_path_str}uxml'
     tree = ET.parse(file_path)
     rootlist = tree.getroot()
     root = rootlist[0]
@@ -43,26 +38,14 @@ def extract_foundations_and_axis(resultcsvpath_neg, resultcsvpath_pos, file_path
             sup_forces_neg_x.append(abs(float(resultcsv_neg["Fx'"][i])))
         if resultcsv_neg["ID"][i] in sup_ID and resultcsv_neg["Max."][i] == "Fy'":
             sup_forces_neg_y.append(abs(float(resultcsv_neg["Fy'"][i])))
-
-    sup_forces_pos, sup_forces_pos_y, sup_forces_pos_x, N_is_pos = [], [], [], []
-    for i in range(len(resultcsv_pos["ID"])):
-        if resultcsv_pos["ID"][i] in sup_ID and resultcsv_pos["Max."][i] == "Fz'":
-            if float(resultcsv_pos["Fz'"][i]) > 0:
-                N_is_pos.append(True)
-                sup_forces_pos.append(round(float(resultcsv_pos["Fz'"][i])))
-            else:
-                N_is_pos.append(False)
-                sup_forces_pos.append(0)
-        if resultcsv_pos["ID"][i] in sup_ID and resultcsv_pos["Max."][i] == "Fx'":
-            sup_forces_pos_x.append(abs(float(resultcsv_pos["Fx'"][i])))
-        if resultcsv_pos["ID"][i] in sup_ID and resultcsv_pos["Max."][i] == "Fy'":
-            sup_forces_pos_y.append(abs(float(resultcsv_pos["Fy'"][i])))
-
-    sup_H = []
-    for i in range(len(sup_ID)):
-        Fx = max(sup_forces_neg_x[i], sup_forces_pos_x[i])
-        Fy = max(sup_forces_neg_y[i], sup_forces_pos_y[i])
-        sup_H.append(round(math.sqrt(math.pow(Fx, 2) + math.pow(Fy, 2))))
+ 
+    sup_forces_neg_perm, sup_forces_neg_var = [], []
+    for i in range(len(resultcsv_neg_perm["ID"])):
+        if resultcsv_neg_perm["ID"][i] in sup_ID and resultcsv_neg_perm["Max."][i] == "Fz'":
+            sup_forces_neg_perm.append(abs(round(float(resultcsv_neg_perm["Fz'"][i]))))
+    for i in range(len(resultcsv_neg_var["ID"])):
+        if resultcsv_neg_var["ID"][i] in sup_ID and resultcsv_neg_var["Max."][i] == "Fz'":
+            sup_forces_neg_var.append(abs(round(float(resultcsv_neg_var["Fz'"][i]))))
 
     data = {
         "ID": sup_ID,
@@ -70,24 +53,24 @@ def extract_foundations_and_axis(resultcsvpath_neg, resultcsvpath_pos, file_path
         "y": sup_y,
         "z": sup_z,
         "N-[kN]": sup_forces_neg,
-        "N+[kN]": sup_forces_pos,
-        "løft": N_is_pos,
-        "H [kN]": sup_H
+        "N perm [kN]": sup_forces_neg_perm,
+        "N var [kN]": sup_forces_neg_var,
+        #"løft": N_is_pos,
+        #"H [kN]": sup_H
     }
 
     df_punktfundamenter = pd.DataFrame(data)
     return df_punktfundamenter
 
-#json_file = json.load(st.file_uploader("Velg JSON-fil", type="json", accept_multiple_files=False))
-#if json_file is not None:
+
 if st.button("hent laster"):
-    #df_punktfundamenter = extract_foundations_and_axis(json_file)
     try:
-        df_punktfundamenter = extract_foundations_and_axis(resultcsvpath_neg, resultcsvpath_pos, file_path)
+        df_punktfundamenter = extract_foundations_and_axis(resultcsvpath_neg_perm, resultcsvpath_neg_var, resultcsvpath_neg,  file_path)
+        df_punktfundamenter
         st.download_button(
             label="Download data as CSV",
-            data=df_punktfundamenter.to_csv(sep=";").encode("utf-8"),
-            file_name="large_df.csv",
+            data=df_punktfundamenter.to_csv(sep=";", index=False).encode("utf-8"),
+            file_name="df_punktfundamenter.csv",
             mime="text/csv",
         )
     except:

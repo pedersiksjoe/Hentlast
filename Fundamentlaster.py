@@ -55,8 +55,6 @@ def extract_foundations_and_axis(resultcsvpath_neg_perm,resultcsvpath_neg_var, r
         "N-[kN]": sup_forces_neg,
         "N perm [kN]": sup_forces_neg_perm,
         "N var [kN]": sup_forces_neg_var,
-        #"løft": N_is_pos,
-        #"H [kN]": sup_H
     }
 
     df_punktfundamenter = pd.DataFrame(data)

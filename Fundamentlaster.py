@@ -6,7 +6,7 @@ ET.register_namespace('', 'urn:strusoft')
 st.title("Hent fundamentlaster")
 
 resultcsvpath_neg = st.file_uploader("Velg out_neg-fil", type="csv", accept_multiple_files=False)
-resultcsvpath_neg_perm = st.file_uploader("Velg out_neg_kar-fil", type="csv", accept_multiple_files=False)
+resultcsvpath_neg_perm = st.file_uploader("Velg out_neg_perm-fil", type="csv", accept_multiple_files=False)
 resultcsvpath_neg_var = st.file_uploader("Velg out_neg_var-fil", type="csv", accept_multiple_files=False)
 file_path = st.file_uploader("Velg femdesign-fil", type="struxml", accept_multiple_files=False)
 

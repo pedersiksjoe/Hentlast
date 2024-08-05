@@ -31,6 +31,21 @@ def extract_foundations_and_axis(resultcsvpath_neg_perm,resultcsvpath_neg_var, r
             sup_ID.append(pointsupport.attrib["name"])
 
     sup_forces_neg, sup_forces_neg_y, sup_forces_neg_x = [], [], []
+    sup_in_res,i_not_in_res = [], []
+    for support in resultcsv_neg_perm["ID"]:
+        if support not in sup_in_res:
+            sup_in_res.append(support)
+
+    for sup in sup_ID:
+        if sup not in sup_in_res:
+            i = sup_ID.index(sup)
+            i_not_in_res.append(i)
+    for i in range(len(i_not_in_res)):
+        sup_ID.pop(i_not_in_res[i]-i)
+        sup_x.pop(i_not_in_res[i]-i)
+        sup_y.pop(i_not_in_res[i]-i)
+        sup_z.pop(i_not_in_res[i]-i)
+    
     for i in range(len(resultcsv_neg["ID"])):
         if resultcsv_neg["ID"][i] in sup_ID and resultcsv_neg["Max."][i] == "Fz'":
             sup_forces_neg.append(abs(round(float(resultcsv_neg["Fz'"][i]))))

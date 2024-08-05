@@ -24,7 +24,7 @@ def extract_foundations_and_axis(resultcsvpath_neg_perm,resultcsvpath_neg_var, r
     sup_ID, sup_x, sup_y, sup_z = [], [], [], []
     for pointsupport in root.iter('{urn:strusoft}point_support'):
         position = pointsupport.find('{urn:strusoft}position')
-        if float(position.attrib['z']) < 6:
+        if float(position.attrib['z']) < 12:
             sup_x.append(round(float(position.attrib['x']), 3))
             sup_y.append(round(float(position.attrib['y']), 3))
             sup_z.append(round(float(position.attrib['z']), 3))
